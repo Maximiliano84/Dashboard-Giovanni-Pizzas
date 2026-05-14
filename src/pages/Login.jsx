@@ -51,7 +51,7 @@ export default function Login() {
       <Card className="w-full max-w-md border-stone-200 shadow-lg">
         <CardHeader className="space-y-4 text-center">
           <div className="mx-auto flex h-20 w-32 items-center justify-center rounded-2xl bg-white shadow-sm">
-            <img src="/Giovanni1.png" alt="Giovanni" className="max-h-20 object-contain" />
+            <img src="/Giovanni.png" alt="Giovanni" className="max-h-20 object-contain" />
           </div>
           <div>
             <CardTitle className="text-2xl text-stone-900">Ingresar al dashboard</CardTitle>
