@@ -62,7 +62,10 @@ export default function Layout() {
         </div>
       </main>
 
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="bottom-center"
+        toastOptions={{
+          className: "mb-4",
+        }} />
     </div>
   );
 }
