@@ -19,6 +19,8 @@ export default function Historial() {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const isSingleDay = from && to && from === to;
   const hasFilters = from || to;
@@ -66,6 +68,7 @@ export default function Historial() {
 
       const sales = salesSnap.docs.map((docSnap) => {
         const d = docSnap.data();
+
         return {
           id: docSnap.id,
           type: "sale",
@@ -78,6 +81,7 @@ export default function Historial() {
 
       const expenses = expSnap.docs.map((docSnap) => {
         const d = docSnap.data();
+
         return {
           id: docSnap.id,
           type: "expense",
@@ -137,13 +141,22 @@ export default function Historial() {
 
   // ---------- eliminar ----------
   const remove = async (item) => {
-    const ok = window.confirm("¿Eliminar registro?");
-    if (!ok) return;
+    if (!item) return;
 
-    const collectionName = item.type === "sale" ? "sales" : "expenses";
-    await deleteDoc(doc(db, collectionName, item.id));
+    setDeleting(true);
 
-    setItems((prev) => prev.filter((i) => i.id !== item.id));
+    try {
+      const collectionName = item.type === "sale" ? "sales" : "expenses";
+
+      await deleteDoc(doc(db, collectionName, item.id));
+
+      setItems((prev) => prev.filter((i) => i.id !== item.id));
+      setRecordToDelete(null);
+    } catch (err) {
+      console.error("Error eliminando registro:", err);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   // ---------- chart ----------
@@ -217,6 +230,7 @@ export default function Historial() {
         </div>
 
         <button
+          type="button"
           onClick={() => {
             setTypeFilter("all");
             setFrom("");
@@ -235,8 +249,18 @@ export default function Historial() {
       {hasFilters && !loading && (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <SummaryCard title="Ventas" value={formatARS(resumen.ventas)} color="emerald" />
-            <SummaryCard title="Gastos" value={formatARS(resumen.gastos)} color="rose" />
+            <SummaryCard
+              title="Ventas"
+              value={formatARS(resumen.ventas)}
+              color="emerald"
+            />
+
+            <SummaryCard
+              title="Gastos"
+              value={formatARS(resumen.gastos)}
+              color="rose"
+            />
+
             <SummaryCard
               title="Ganancia"
               value={formatARS(resumen.ganancia)}
@@ -248,7 +272,12 @@ export default function Historial() {
                     : "amber"
               }
             />
-            <SummaryCard title="Pizzas vendidas" value={resumen.pizzas.toString()} color="orange" />
+
+            <SummaryCard
+              title="Pizzas vendidas"
+              value={resumen.pizzas.toString()}
+              color="orange"
+            />
           </div>
 
           <HistorialChart data={chartData} />
@@ -263,20 +292,28 @@ export default function Historial() {
               {filtered.map((i) => (
                 <tr key={i.id} className="border-b hover:bg-stone-50">
                   <td className="p-3">{i.name}</td>
+
                   <td className="p-3 text-right">{i.quantity}</td>
+
                   <td
                     className={`p-3 text-right font-semibold ${i.type === "sale"
-                      ? "text-emerald-600"
-                      : "text-rose-600"
+                        ? "text-emerald-600"
+                        : "text-rose-600"
                       }`}
                   >
                     {i.type === "sale"
                       ? `+ ${formatARS(i.amount)}`
                       : `- ${formatARS(i.amount)}`}
                   </td>
-                  <td className="p-3">
-                    <button onClick={() => remove(i)}>
-                      <Trash2 className="w-4 h-4 text-rose-600" />
+
+                  <td className="p-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => setRecordToDelete(i)}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-rose-600 transition hover:bg-rose-50"
+                      aria-label="Eliminar registro"
+                    >
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
                 </tr>
@@ -295,6 +332,63 @@ export default function Historial() {
       {!hasFilters && (
         <div className="text-center text-stone-400">
           Seleccioná una fecha para ver el historial
+        </div>
+      )}
+
+      {/* MODAL ELIMINAR */}
+      {recordToDelete && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-history-title"
+        >
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+            <div className="space-y-2">
+              <h2
+                id="delete-history-title"
+                className="text-lg font-bold text-stone-900"
+              >
+                Eliminar registro
+              </h2>
+
+              <p className="text-sm text-stone-500">
+                Esta acción eliminará el registro del historial. No se puede
+                deshacer.
+              </p>
+            </div>
+
+            <div className="mt-4 rounded-xl border bg-stone-50 p-3 text-sm">
+              <p className="font-medium text-stone-800">
+                {recordToDelete.name}
+              </p>
+
+              <p className="mt-1 text-stone-500">
+                {recordToDelete.type === "sale" ? "Venta" : "Gasto"} ·{" "}
+                {formatARS(recordToDelete.amount)}
+              </p>
+            </div>
+
+            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => setRecordToDelete(null)}
+                className="rounded-xl border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => remove(recordToDelete)}
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "Eliminando..." : "Eliminar"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
