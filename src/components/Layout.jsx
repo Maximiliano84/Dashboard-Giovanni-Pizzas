@@ -33,7 +33,7 @@ export default function Layout() {
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-30 flex items-center justify-between border-b border-stone-200 bg-white px-4 h-14">
         <Link to="/" className="flex items-center shrink-0" aria-label="Ir al inicio">
-          <img src="/Giovanni.png" alt="Giovanni" className="h-20 sm:h-20 md:h-14 object-contain" />
+          <img src="/Giovanni1.png" alt="Giovanni" className="h-20 sm:h-20 md:h-14 object-contain" />
         </Link>
         <button
           data-testid="boton-menu-mobile"
@@ -75,8 +75,8 @@ function SidebarContent() {
       <div className="px-2 py-2 border-b border-stone-200">
         <Link to="/" className="block border-b bg-white" aria-label="Ir al inicio">
           <img
-            src="/Giovanni.png"
-            alt="Giovanni"
+            src="/Giovanni1.png"
+            alt="Giovanni1"
             className="w-44 object-contain mx-auto my-3 transition hover:scale-[1.02]"
           />
         </Link>
