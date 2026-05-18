@@ -58,12 +58,13 @@ export default function Costos() {
         setNewFixed,
 
         toDeleteFixed,
-        setToDeleteFixed,
 
         handleAddFixed,
         handleUpdateFixed,
         handleDeleteFixed,
         confirmDeleteFixed,
+        deletingFixed,
+        cancelDeleteFixed,
     } = useFixedCostsManager({
         fixedCosts,
         updateFixedCosts,
@@ -201,14 +202,11 @@ export default function Costos() {
 
             <ConfirmDeleteDialog
                 open={!!toDeleteFixed}
-                onClose={() =>
-                    setToDeleteFixed(null)
-                }
+                onClose={cancelDeleteFixed}
                 title="Eliminar costo fijo"
                 description={`Eliminar "${toDeleteFixed?.name}"`}
-                onConfirm={
-                    confirmDeleteFixed
-                }
+                onConfirm={confirmDeleteFixed}
+                loading={deletingFixed}
             />
         </div>
     );

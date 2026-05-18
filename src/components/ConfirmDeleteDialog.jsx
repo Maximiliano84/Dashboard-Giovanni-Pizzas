@@ -1,49 +1,55 @@
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from "./ui/dialog";
-
-import { Button } from "./ui/button";
-
 export default function ConfirmDeleteDialog({
     open,
     onClose,
+    title = "Eliminar",
+    description = "Esta acción no se puede deshacer.",
     onConfirm,
-    loading = false,
-    title = "Confirmar",
-    description = "¿Estás seguro?",
+    confirmText = "Eliminar",
+    cancelText = "Cancelar",
 }) {
+    if (!open) return null;
+
+    const handleConfirm = async () => {
+        if (typeof onConfirm === "function") {
+            await onConfirm();
+        }
+    };
+
     return (
-        <Dialog open={open} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{title}</DialogTitle>
-                    <DialogDescription>
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+            role="dialog"
+            aria-modal="true"
+        >
+            <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+                <div className="space-y-2">
+                    <h2 className="text-lg font-bold text-stone-900">
+                        {title}
+                    </h2>
+
+                    <p className="text-sm text-stone-500">
                         {description}
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div className="flex justify-end gap-2 mt-4">
-                    <Button
-                        variant="ghost"
-                        onClick={onClose}
-                        disabled={loading}
-                    >
-                        Cancelar
-                    </Button>
-
-                    <Button
-                        className="bg-rose-600 hover:bg-rose-700"
-                        onClick={onConfirm}
-                        disabled={loading}
-                    >
-                        {loading ? "Eliminando..." : "Eliminar"}
-                    </Button>
+                    </p>
                 </div>
-            </DialogContent>
-        </Dialog>
+
+                <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="rounded-xl border border-stone-200 px-4 py-2 text-sm font-medium text-stone-700 transition hover:bg-stone-50"
+                    >
+                        {cancelText}
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={handleConfirm}
+                        className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700"
+                    >
+                        {confirmText}
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }

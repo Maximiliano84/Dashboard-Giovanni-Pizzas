@@ -36,3 +36,6 @@ dist-ssr
 *.sw?
 
 desktop.ini
+
+.firebase
+firebase-debug.log
